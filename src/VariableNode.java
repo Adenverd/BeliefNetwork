@@ -24,6 +24,9 @@ public abstract class VariableNode extends Node{
      */
     public abstract void addCategoricalParent(CategoricalNode nParent);
 
+    public void addChild(VariableNode child){
+        this.getChildren().add(child);
+    }
 
     //GETTERS AND SETTERS
     public List<VariableNode> getChildren() {

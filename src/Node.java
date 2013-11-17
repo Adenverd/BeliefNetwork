@@ -5,6 +5,7 @@ import java.util.*;
 public class Node {
     protected NodeValue nodeValue;
     protected boolean observed;
+    public static Random random = new Random(1);
 
     /**
      * Draws from a probability distribution given by probabilities. Assumes the indices of probabilities are the values
@@ -15,7 +16,7 @@ public class Node {
     public static NodeValue drawFromDistribution(Map<NodeValue, Double> probabilities){
         Map<NodeValue, Double> normalizedProbabilities = normalizeProbabilities(probabilities);
 
-        Random random = new Random(System.currentTimeMillis()); //seed a Random with the current system time
+        //Random random = new Random(System.currentTimeMillis()); //seed a Random with the current system time
         Double randVal = random.nextDouble();
 
         double sum = 0.0;
@@ -45,7 +46,7 @@ public class Node {
         }
         Double nSum = 0.0;
         for(NodeValue key : probabilities.keySet()){
-            normalizedProbabilities.put(key, normalizedProbabilities.get(key)/sum); //concurrent modification exception?
+            normalizedProbabilities.put(key, probabilities.get(key)/sum); //concurrent modification exception?
             nSum+=(normalizedProbabilities.get(key));
         }
         if (!nSum.equals(1.0)){

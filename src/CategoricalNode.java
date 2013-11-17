@@ -3,6 +3,8 @@ import exceptions.BeliefNetworkException;
 import java.util.*;
 
 public class CategoricalNode extends VariableNode {
+    public static final Set<NodeValue> NO_PARENTS = Collections.EMPTY_SET;
+
     protected Map<Double, NodeValue> possibleValues;
     protected Map<Set<NodeValue>, Map<NodeValue, Node>> parameters; //stores the probabilities for each value for each possible combination of parent values
 
@@ -30,7 +32,7 @@ public class CategoricalNode extends VariableNode {
 
         /*Categorical nodes have one column per possible nodeValue that contains the probability of that nodeValue given
         the current permutation of parent values.*/
-        return this.parameters.get(parentNodeValues).get((int)nodeValue.getValue()).getNodeValue().getValue();
+        return this.parameters.get(parentNodeValues).get(nodeValue).getNodeValue().getValue();
     }
 
     @Override
@@ -56,53 +58,130 @@ public class CategoricalNode extends VariableNode {
         }
 
         this.getCategoricalParents().add(nParent);
+        nParent.addChild(this);
 
-        //duplicate parameters nParent.possibleValues.size() times
-        boolean isFirstParentValue = true;
-        NodeValue firstNParentValue = null;
-
-        Set<Map<Set<NodeValue>, Map<NodeValue, Node>>> allDuplicateParameters = new HashSet<Map<Set<NodeValue>, Map<NodeValue, Node>>>();
-
-        for(NodeValue nParentValue : nParent.getPossibleValues().values()){
-            if(isFirstParentValue){ //if this is the first parent value, store it so we can add it to this.parameters after all the duplication stuffs
-                firstNParentValue = nParentValue;
-                isFirstParentValue = false;
+        if(this.getParameters().size()==0){ //if this node doesn't have any parameters, we only need to add the the parent's values each as a set
+            for(NodeValue nParentValue : nParent.getPossibleValues().values()){
+                Set<NodeValue> parentVal = new HashSet<NodeValue>();
+                parentVal.add(nParentValue);
+                this.getParameters().put(parentVal, new HashMap<NodeValue, Node>());
             }
-            else{
-                //otherwise, we need to duplicate this.parameters and add nParentValue to each of the keys
-                Map<Set<NodeValue>, Map<NodeValue, Node>> duplicateParameters = new HashMap<Set<NodeValue>, Map<NodeValue, Node>>();
-                //for each parameters row
-                for(Map.Entry<Set<NodeValue>, Map<NodeValue, Node>> parameter : this.getParameters().entrySet()){
-                    //duplicate the set of NodeValues
-                    Set<NodeValue> newNodeValueSet = new HashSet<NodeValue>();
-                    newNodeValueSet.addAll(parameter.getKey());
+        }
+        else{
+            //duplicate parameters nParent.possibleValues.size() times
+            boolean isFirstParentValue = true;
+            NodeValue firstNParentValue = null;
 
-                    //add the new NodeValue to the duplicate set
-                    newNodeValueSet.add(nParentValue);
+            Set<Map<Set<NodeValue>, Map<NodeValue, Node>>> allDuplicateParameters = new HashSet<Map<Set<NodeValue>, Map<NodeValue, Node>>>();
 
-                    //store it in new map of new parameters
-                    duplicateParameters.put(newNodeValueSet, new HashMap<NodeValue, Node>());
+            for(NodeValue nParentValue : nParent.getPossibleValues().values()){
+                if(isFirstParentValue){ //if this is the first parent value, store it so we can add it to this.parameters after all the duplication stuffs
+                    firstNParentValue = nParentValue;
+                    isFirstParentValue = false;
                 }
-                //store this map of new parameters in a set of maps to be added to this.parameters later
-                allDuplicateParameters.add(duplicateParameters);
+                else{
+                    //otherwise, we need to duplicate this.parameters and add nParentValue to each of the keys
+                    Map<Set<NodeValue>, Map<NodeValue, Node>> duplicateParameters = new HashMap<Set<NodeValue>, Map<NodeValue, Node>>();
+                    //for each parameters row
+                    for(Map.Entry<Set<NodeValue>, Map<NodeValue, Node>> parameter : this.getParameters().entrySet()){
+                        //duplicate the set of NodeValues
+                        Set<NodeValue> newNodeValueSet = new HashSet<NodeValue>();
+                        newNodeValueSet.addAll(parameter.getKey());
+
+                        //add the new NodeValue to the duplicate set
+                        newNodeValueSet.add(nParentValue);
+
+                        //store it in new map of new parameters
+                        duplicateParameters.put(newNodeValueSet, new HashMap<NodeValue, Node>());
+                    }
+                    //store this map of new parameters in a set of maps to be added to this.parameters later
+                    allDuplicateParameters.add(duplicateParameters);
+                }
             }
-        }
 
-        for(Map.Entry<Set<NodeValue>, Map<NodeValue, Node>> parameter : this.getParameters().entrySet()){
-            parameter.getKey().add(firstNParentValue);
-        }
+            for(Map.Entry<Set<NodeValue>, Map<NodeValue, Node>> parameter : this.getParameters().entrySet()){
+                parameter.getKey().add(firstNParentValue);
+            }
 
-        //add all new parameters to this.parameters
-        for(Map<Set<NodeValue>, Map<NodeValue, Node>> newParameters : allDuplicateParameters){
-            this.parameters.putAll(newParameters);
+            //add all new parameters to this.parameters
+            for(Map<Set<NodeValue>, Map<NodeValue, Node>> newParameters : allDuplicateParameters){
+                this.getParameters().putAll(newParameters);
+            }
         }
     }
 
-    public void addPossibleValue(Double value){
+    public NodeValue addPossibleValue(double value){
         NodeValue nVal = new NodeValue(this, value);
 
         //it is imperative that the key in possibleValues equals nVal.getValue()
-        this.possibleValues.put(value, nVal);
+        return this.getPossibleValues().put(value, nVal);
+    }
+
+    public NodeValue getPossibleValue(double value){
+        if(this.getPossibleValues().containsKey(value)){
+            return this.getPossibleValues().get(value);
+        }
+
+        throw new BeliefNetworkException("This node does not contain " + value + " as a possible value");
+    }
+
+    /**
+     * Adds a parameter to parameters for a set of parentValues and one of this node's possible values.
+     * @param parentValues
+     * @param possibleValue
+     * @param parameter
+     */
+    public void setParameter(Set<NodeValue> parentValues, NodeValue possibleValue, Node parameter){
+        if (!this.getPossibleValues().containsValue(possibleValue)){//this.possibleValues should contain possibleValue
+            throw new BeliefNetworkException("Cannot add a parameter for a possibleValue that isn't in this.possibleValues");
+        }
+        else if(!this.getParameters().containsKey(parentValues)){//parameters should contain a spot for this parameter
+            if(this.getCategoricalParents().size()==0){//unless this node has no categorical parents
+                this.getParameters().put(NO_PARENTS, new HashMap<NodeValue, Node>()); //put an entry for the empty set so we can add parameters to it
+                this.getParameters().get(NO_PARENTS).put(possibleValue, parameter);
+            }
+            else{
+                throw new BeliefNetworkException("Cannot add a parameter for a set of parent values that aren't in this.parameters");
+            }
+        }
+        else{ //add the parameter
+            this.getParameters().get(parentValues).put(possibleValue, parameter);
+        }
+    }
+
+    /**
+     * Adds a parameter to parameters for a set of parentValues and one of this node's possible values.
+     * @param parentValues
+     * @param posValue
+     * @param parameter
+     */
+    public void setParameter(Set<NodeValue> parentValues, double posValue, Node parameter){
+        if (!this.getPossibleValues().containsKey(posValue)){//this.possibleValues should contain possibleValue
+            throw new BeliefNetworkException("Cannot add a parameter for a possibleValue that isn't in this.possibleValues");
+        }
+
+        NodeValue possibleValue = this.possibleValues.get(posValue);
+
+        if(!this.getParameters().containsKey(parentValues)){//parameters should contain a spot for this parameter
+            if(this.getCategoricalParents().size()==0){//unless this node has no categorical parents
+                this.getParameters().put(NO_PARENTS, new HashMap<NodeValue, Node>()); //put an entry for the empty set so we can add parameters to it
+                this.getParameters().get(NO_PARENTS).put(possibleValue, parameter);
+            }
+            else{
+                throw new BeliefNetworkException("Cannot add a parameter for a set of parent values that aren't in this.parameters");
+            }
+        }
+        else{ //add the parameter
+            this.getParameters().get(parentValues).put(possibleValue, parameter);
+        }
+    }
+
+    public void setParameter(NodeValue possibleValue, Node parameter){
+        setParameter(NO_PARENTS, possibleValue, parameter);
+    }
+
+    public void setParameter(double posValue, Node parameter){
+       setParameter(NO_PARENTS, posValue, parameter);
     }
 
     //GETTERS AND SETTERS
