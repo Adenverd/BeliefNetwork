@@ -16,7 +16,7 @@ public abstract class VariableNode extends Node{
     /**
      * Draws from the joint probability of this node and assigns that nodeValue to this node.
      */
-    public abstract void gibbsSample();
+    public abstract void sample();
 
     /**
      * Adds a CategoricalNode to this.categoricalParents and resizes

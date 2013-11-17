@@ -11,6 +11,7 @@ public abstract class ContinuousNode extends VariableNode{
     }
 
     @Override
+    //TODO: add support to check that the current distribution supports value
     public double conditionalProbability(NodeValue value) {
         //find appropriate row in this.parameters
         Set<NodeValue> parentValues = new HashSet<NodeValue>();
@@ -20,11 +21,6 @@ public abstract class ContinuousNode extends VariableNode{
 
         //Continuous nodes use PDF to calculate conditional probability
         return this.pdf(value.getValue(), this.getParameters().get(parentValues));
-    }
-
-    @Override
-    public void gibbsSample(){
-
     }
 
     @Override
@@ -91,5 +87,4 @@ public abstract class ContinuousNode extends VariableNode{
     public void setParameters(Map<Set<NodeValue>, List<Node>> parameters) {
         this.parameters = parameters;
     }
-
 }

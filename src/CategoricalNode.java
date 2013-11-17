@@ -36,7 +36,7 @@ public class CategoricalNode extends VariableNode {
     }
 
     @Override
-    public void gibbsSample() {
+    public void sample() {
         Map<NodeValue, Double> valueProbabilities = new HashMap<NodeValue, Double>();//map to store the conditional probabilities of each possible nodeValue for this node
 
         for(NodeValue possibleValue : this.getPossibleValues().values()){

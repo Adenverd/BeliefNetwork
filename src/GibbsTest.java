@@ -64,7 +64,7 @@ public class GibbsTest {
                 CategoricalNode node = nodes.get(index);
                 nodes.remove(index);
                 if (!node.isObserved()){
-                    node.gibbsSample();
+                    node.sample();
                 }
                 nodeValues.add(node.getNodeValue());
             }
@@ -86,7 +86,7 @@ public class GibbsTest {
         int oneCount = 0;
         Counter<NodeValue> valueCounter = new Counter<NodeValue>();
         for(int i = 0; i < 10000; i++){
-            nodeB.gibbsSample();
+            nodeB.sample();
             Double value = nodeB.getNodeValue().getValue();
             if (value.equals(0.0)){
                 zeroCount++;
