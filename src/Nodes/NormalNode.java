@@ -1,26 +1,21 @@
+package Nodes;
+
+import helpers.Rand;
 import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.List;
 import java.util.Random;
 
 public class NormalNode extends ContinuousNode{
 
-    protected Random random;
-
-    public NormalNode(){
-        random = new Random();
-    }
-
     @Override
     /**
-     * pdfParams.get(0) is mean, pdfParams.get(1) is stdDev (o^2)
+     * pdfParams.get(0) is mean, pdfParams.get(1) is variance (o^2)
      */
     public double pdf(double x, List<Node> pdfParams) {
         double mean = pdfParams.get(0).getNodeValue().getValue();
-        double stdDev = pdfParams.get(1).getNodeValue().getValue();
-        NormalDistribution normalDistribution = new NormalDistribution(mean, stdDev);
+        double variance = pdfParams.get(1).getNodeValue().getValue();
+        NormalDistribution normalDistribution = new NormalDistribution(mean, Math.sqrt(variance));
 
         return normalDistribution.density(x);
     }
@@ -38,7 +33,7 @@ public class NormalNode extends ContinuousNode{
         }
 
         //calculate joint distribution probability of a new value for this node
-        NodeValue testValue = new NodeValue(this, currentValue.getValue() + random.nextGaussian());
+        NodeValue testValue = new NodeValue(this, currentValue.getValue() + Rand.nextGaussian());
         this.setNodeValue(testValue);
         double testProbability = Math.log(this.conditionalProbability(this.getNodeValue()));
         for(VariableNode child : this.getChildren()){
@@ -46,7 +41,7 @@ public class NormalNode extends ContinuousNode{
         }
 
         //compare probabilities. If testProbability is better, change current value to testValue
-        if(Math.log(random.nextDouble()) < testProbability - currentProbability){
+        if(Math.log(Rand.nextDouble()) < testProbability - currentProbability){
             this.setNodeValue(testValue);
         }
     }

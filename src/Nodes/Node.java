@@ -1,12 +1,13 @@
+package Nodes;
+
 import exceptions.BeliefNetworkException;
+import helpers.Rand;
 
 import java.util.*;
 
 public class Node {
     protected NodeValue nodeValue;
     protected boolean observed;
-    public static Random random = new Random(1);
-
     /**
      * Draws from a probability distribution given by probabilities. Assumes the indices of probabilities are the values
      * associated with the probabilities. Normalizes probabilities before drawing.
@@ -16,8 +17,7 @@ public class Node {
     public static NodeValue drawFromDistribution(Map<NodeValue, Double> probabilities){
         Map<NodeValue, Double> normalizedProbabilities = normalizeProbabilities(probabilities);
 
-        //Random random = new Random(System.currentTimeMillis()); //seed a Random with the current system time
-        Double randVal = random.nextDouble();
+        Double randVal = Rand.nextDouble();
 
         double sum = 0.0;
         for(NodeValue key : normalizedProbabilities.keySet()){

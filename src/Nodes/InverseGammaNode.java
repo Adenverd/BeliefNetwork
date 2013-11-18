@@ -1,3 +1,5 @@
+package Nodes;
+
 import org.apache.commons.math3.special.Gamma;
 
 import java.util.List;
@@ -16,5 +18,10 @@ public class InverseGammaNode extends ContinuousNode{
         double gamma = Gamma.gamma(x);
 
         return (Math.pow(beta, alpha)/gamma)*(Math.pow(x, (-1 * alpha)-1))*(Math.exp(-1*beta/x));
+    }
+
+    @Override
+    public void sample() {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 }

@@ -1,3 +1,6 @@
+import Nodes.CategoricalNode;
+import Nodes.ConstantNode;
+import Nodes.NodeValue;
 import exceptions.BeliefNetworkException;
 import helpers.Counter;
 

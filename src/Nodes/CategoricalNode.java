@@ -1,10 +1,10 @@
+package Nodes;
+
 import exceptions.BeliefNetworkException;
 
 import java.util.*;
 
 public class CategoricalNode extends VariableNode {
-    public static final Set<NodeValue> NO_PARENTS = Collections.EMPTY_SET;
-
     protected Map<Double, NodeValue> possibleValues;
     protected Map<Set<NodeValue>, Map<NodeValue, Node>> parameters; //stores the probabilities for each value for each possible combination of parent values
 
@@ -88,7 +88,7 @@ public class CategoricalNode extends VariableNode {
                         Set<NodeValue> newNodeValueSet = new HashSet<NodeValue>();
                         newNodeValueSet.addAll(parameter.getKey());
 
-                        //add the new NodeValue to the duplicate set
+                        //add the new Nodes.NodeValue to the duplicate set
                         newNodeValueSet.add(nParentValue);
 
                         //store it in new map of new parameters

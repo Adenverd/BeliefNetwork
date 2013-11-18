@@ -1,3 +1,5 @@
+package Nodes;
+
 import exceptions.BeliefNetworkException;
 
 import java.util.*;
@@ -51,7 +53,7 @@ public abstract class ContinuousNode extends VariableNode{
                     Set<NodeValue> newNodeValueSet = new HashSet<NodeValue>();
                     newNodeValueSet.addAll(parameter.getKey());
 
-                    //add the new NodeValue to the duplicate set
+                    //add the new Nodes.NodeValue to the duplicate set
                     newNodeValueSet.add(nParentValue);
 
                     //store it in new map of new parameters
@@ -70,6 +72,10 @@ public abstract class ContinuousNode extends VariableNode{
         for(Map<Set<NodeValue>, List<Node>> newParameters : allDuplicateParameters){
             this.parameters.putAll(newParameters);
         }
+    }
+
+    public void addParameters(Set<NodeValue> parentValues, List<Node> parameterValues){
+        parameters.put(parentValues, parameterValues);
     }
 
     /**

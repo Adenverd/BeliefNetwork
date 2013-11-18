@@ -1,3 +1,5 @@
+package Nodes;
+
 public class ConstantNode extends Node {
     public ConstantNode(double value){
         this.observed = true;

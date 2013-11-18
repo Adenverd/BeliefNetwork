@@ -1,8 +1,10 @@
-import exceptions.BeliefNetworkException;
+package Nodes;
 
 import java.util.*;
 
 public abstract class VariableNode extends Node{
+    public static final Set<NodeValue> NO_PARENTS = Collections.EMPTY_SET;
+
     protected List<VariableNode> children;
     protected List<CategoricalNode> categoricalParents;
 
@@ -19,7 +21,7 @@ public abstract class VariableNode extends Node{
     public abstract void sample();
 
     /**
-     * Adds a CategoricalNode to this.categoricalParents and resizes
+     * Adds a Nodes.CategoricalNode to this.categoricalParents and resizes
      * this.parameters so that this.parameters.rows = product(foreach(this.parents.values)
      */
     public abstract void addCategoricalParent(CategoricalNode nParent);

@@ -1,3 +1,5 @@
+package Nodes;
+
 public class NodeValue {
     private Node node;
     private double value;
