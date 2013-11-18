@@ -25,12 +25,7 @@ public class NormalNode extends ContinuousNode{
      * Metropolis sampling
      */
     public void sample(){
-        //calculate joint distribution probability of current value for this node
         NodeValue currentValue = this.getNodeValue();
-        double currentProbability = Math.log(this.conditionalProbability(currentValue));
-        for (VariableNode child : this.getChildren()){
-            currentProbability += Math.log(child.conditionalProbability(child.getNodeValue()));
-        }
 
         //calculate joint distribution probability of a new value for this node
         NodeValue testValue = new NodeValue(this, currentValue.getValue() + Rand.nextGaussian());
@@ -40,8 +35,16 @@ public class NormalNode extends ContinuousNode{
             testProbability += Math.log(child.conditionalProbability(child.getNodeValue()));
         }
 
+        //calculate joint distribution probability of current value for this node
+        this.setNodeValue(currentValue);
+        double currentProbability = Math.log(this.conditionalProbability(currentValue));
+        for (VariableNode child : this.getChildren()){
+            currentProbability += Math.log(child.conditionalProbability(child.getNodeValue()));
+        }
+
+        double randUniform = Math.log(Rand.nextDouble());
         //compare probabilities. If testProbability is better, change current value to testValue
-        if(Math.log(Rand.nextDouble()) < testProbability - currentProbability){
+        if(randUniform < testProbability - currentProbability){
             this.setNodeValue(testValue);
         }
     }

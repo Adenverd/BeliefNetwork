@@ -142,7 +142,7 @@ public class NaiveBayes extends SupervisedLearner {
                 parentValuesParameters.put(rowLabelValues, parameters);
             }
         }
-        
+
         return parentValuesParameters;
     }
 }
