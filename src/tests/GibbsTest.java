@@ -1,3 +1,5 @@
+package tests;
+
 import Nodes.CategoricalNode;
 import Nodes.ConstantNode;
 import Nodes.NodeValue;

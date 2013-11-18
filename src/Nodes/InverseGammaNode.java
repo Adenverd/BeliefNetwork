@@ -1,5 +1,6 @@
 package Nodes;
 
+import helpers.Rand;
 import org.apache.commons.math3.special.Gamma;
 
 import java.util.List;
@@ -13,15 +14,39 @@ public class InverseGammaNode extends ContinuousNode{
      */
     @Override
     public double pdf(double x, List<Node> pdfParams) {
+        if(!(x>0)){
+            return 0;
+        }
         double alpha = pdfParams.get(0).getNodeValue().getValue();
         double beta = pdfParams.get(1).getNodeValue().getValue();
-        double gamma = Gamma.gamma(x);
+        double gamma = Gamma.gamma(alpha);
 
-        return (Math.pow(beta, alpha)/gamma)*(Math.pow(x, (-1 * alpha)-1))*(Math.exp(-1*beta/x));
+        return (Math.exp(-1*(beta/x))*Math.pow(beta/x, alpha))/(x*gamma);
+        //return (Math.pow(beta, alpha)/gamma)*(Math.pow(x, (-1 * alpha)-1))*(Math.exp(-1*beta/x));
     }
 
-    @Override
-    public void sample() {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void sample(){
+        NodeValue currentValue = this.getNodeValue();
+
+        //calculate joint distribution probability of a new value for this node
+        NodeValue testValue = new NodeValue(this, currentValue.getValue() + Rand.nextGaussian());
+        this.setNodeValue(testValue);
+        double testProbability = Math.log(this.conditionalProbability(this.getNodeValue()));
+        for(VariableNode child : this.getChildren()){
+            testProbability += Math.log(child.conditionalProbability(child.getNodeValue()));
+        }
+
+        //calculate joint distribution probability of current value for this node
+        this.setNodeValue(currentValue);
+        double currentProbability = Math.log(this.conditionalProbability(currentValue));
+        for (VariableNode child : this.getChildren()){
+            currentProbability += Math.log(child.conditionalProbability(child.getNodeValue()));
+        }
+
+        double randUniform = Math.log(Rand.nextDouble());
+        //compare probabilities. If testProbability is better, change current value to testValue
+        if(randUniform < testProbability - currentProbability){
+            this.setNodeValue(testValue);
+        }
     }
 }
