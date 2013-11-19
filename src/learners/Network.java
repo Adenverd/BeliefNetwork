@@ -15,12 +15,10 @@ public class Network {
     }
 
     public void markovChainMonteCarlo(int iterations){
-        List<VariableNode> tempNodes = new ArrayList<VariableNode>(nodes);
-        int numNodes = nodes.size();
         for(int i = 0; i < iterations; i++){
-            Collections.shuffle(tempNodes);
-            for(int j = 0; j < tempNodes.size(); j++){
-                VariableNode randNode = tempNodes.get(j);
+            Collections.shuffle(nodes);
+            for(int j = 0; j < nodes.size(); j++){
+                VariableNode randNode = nodes.get(j);
                 if(!randNode.isObserved()){
                     randNode.sample();
                     int blah = 0;
@@ -30,11 +28,9 @@ public class Network {
     }
 
     public List<NodeValue> sampleNetwork(List<Node> unitNodes){
-        List<VariableNode> tempNodes = new ArrayList<VariableNode>(nodes);
-        int numNodes = nodes.size();
-        Collections.shuffle(tempNodes);
-        for(int j = 0; j < numNodes; j++){
-            VariableNode node = tempNodes.get(j);
+        Collections.shuffle(nodes);
+        for(int j = 0; j < nodes.size(); j++){
+            VariableNode node = nodes.get(j);
             if(!node.isObserved()){
                 node.sample();
             }
