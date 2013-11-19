@@ -4,6 +4,7 @@ import helpers.Rand;
 import org.apache.commons.math3.special.Gamma;
 
 import java.util.List;
+import static helpers.MathUtility.inverseGammaPdf;
 
 public class InverseGammaNode extends ContinuousNode{
 
@@ -22,10 +23,11 @@ public class InverseGammaNode extends ContinuousNode{
         }
         double alpha = pdfParams.get(0).getNodeValue().getValue();
         double beta = pdfParams.get(1).getNodeValue().getValue();
-        double gamma = Gamma.gamma(alpha);
-
-        return (Math.exp(-1*(beta/x))*Math.pow(beta/x, alpha))/(x*gamma);
-        //return (Math.pow(beta, alpha)/gamma)*(Math.pow(x, (-1 * alpha)-1))*(Math.exp(-1*beta/x));
+        return inverseGammaPdf(x, alpha, beta);
+//        double gamma = Gamma.gamma(alpha);
+//
+//        //return (Math.exp(-1*(beta/x))*Math.pow(beta/x, alpha))/(x*gamma);
+//        return (Math.pow(beta, alpha)/gamma)*(Math.pow(x, (-1 * alpha)-1))*(Math.exp(-1*beta/x));
     }
 
     public void sample(){

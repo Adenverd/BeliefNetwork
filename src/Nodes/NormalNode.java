@@ -6,7 +6,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
+import static helpers.MathUtility.normalPdf;
 public class NormalNode extends ContinuousNode{
 
     public NormalNode(){
@@ -29,9 +29,10 @@ public class NormalNode extends ContinuousNode{
     public double pdf(double x, List<Node> pdfParams) {
         double mean = pdfParams.get(0).getNodeValue().getValue();
         double stdDev = pdfParams.get(1).getNodeValue().getValue();
-        NormalDistribution normalDistribution = new NormalDistribution(mean, stdDev*stdDev);
-
-        return normalDistribution.density(x);
+        return normalPdf(x, mean, stdDev);
+//        NormalDistribution normalDistribution = new NormalDistribution(mean, stdDev*stdDev);
+//
+//        return normalDistribution.density(x);
     }
 
     @Override
