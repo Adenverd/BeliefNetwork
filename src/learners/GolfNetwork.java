@@ -13,13 +13,15 @@ public class GolfNetwork {
     public static void main(String[] args) throws IOException {
         Matrix points = ARFFParser.loadARFF(args[0]);
 
+        Network network = new Network();
         NormalNode normalNode = new NormalNode();
         ConstantNode normalNodeMean = new ConstantNode(71.82);
-        ConstantNode normalNodeVar = new ConstantNode(2.42);
+        ConstantNode normalNodeDev = new ConstantNode(Math.sqrt(2.42));
         List<Node> normalNodeParams = new ArrayList<Node>();
         normalNodeParams.add(normalNodeMean);
-        normalNodeParams.add(normalNodeVar);
+        normalNodeParams.add(normalNodeDev);
         normalNode.addParameters(VariableNode.NO_PARENTS, normalNodeParams);
+        network.add(normalNode);
 
         InverseGammaNode ig1 = new InverseGammaNode();
         ConstantNode ig1Alpha = new ConstantNode(18);
@@ -28,6 +30,7 @@ public class GolfNetwork {
         ig1Params.add(ig1Alpha);
         ig1Params.add(ig1Beta);
         ig1.addParameters(VariableNode.NO_PARENTS, ig1Params);
+        network.add(ig1);
 
         InverseGammaNode ig2 = new InverseGammaNode();
         ConstantNode ig2Alpha = new ConstantNode(18);
@@ -36,6 +39,7 @@ public class GolfNetwork {
         ig2Params.add(ig2Alpha);
         ig2Params.add(ig2Beta);
         ig2.addParameters(VariableNode.NO_PARENTS, ig2Params);
+        network.add(ig2);
 
         InverseGammaNode ig3 = new InverseGammaNode();
         ConstantNode ig3Alpha = new ConstantNode(83);
@@ -44,8 +48,7 @@ public class GolfNetwork {
         ig3Params.add(ig3Alpha);
         ig3Params.add(ig3Beta);
         ig3.addParameters(VariableNode.NO_PARENTS, ig3Params);
-
-        Network network = new Network();
+        network.add(ig3);
 
         //tournament difficulty nodes
         List<NormalNode> tournamentNodes = new ArrayList<NormalNode>();
@@ -103,44 +106,75 @@ public class GolfNetwork {
             //network.add(swingNode);
         }
 
-        network.markovChainMonteCarlo(100);
-
-        Map<NormalNode, List<Double>> scores = new HashMap<NormalNode, List<Double>>();
-        for(int i = 0; i < 100; i++){
+        network.markovChainMonteCarlo(50000);
+        List<List<Double>> scores = new ArrayList<List<Double>>();
+        for(int i = 0; i < golferNodes.size(); i++){
+            scores.add(new ArrayList<Double>());
+        }
+//        Map<NormalNode, List<Double>> scores = new HashMap<NormalNode, List<Double>>();
+        for(int i = 0; i < 50000; i++){
             List<NodeValue> itScores = network.sampleNetwork(golferNodes);
-            for(NodeValue score : itScores){
-                if(scores.containsKey(score.getNode())){
-                    scores.get(score.getNode()).add(score.getValue());
-                }
-                else{
-                    List<Double> golferScores = new ArrayList<Double>();
-                    golferScores.add(score.getValue());
-                    scores.put((NormalNode)score.getNode(), golferScores);
-                }
+            for(int j = 0; j < itScores.size(); j++){
+                scores.get(j).add(itScores.get(j).getValue());
             }
         }
 
-        TreeMap<Double, NormalNode> medianErrors = new TreeMap<Double, NormalNode>();
-        for(Map.Entry<NormalNode, List<Double>> entry : scores.entrySet()){
-            List<Double> sortedScores = new ArrayList<Double>(entry.getValue());
+        List<Double> medianErrors = new ArrayList<Double>();
+        for(int i = 0; i < golferNodes.size(); i++){
+            medianErrors.add(0.0);
+        }
+        int i = 0;
+        for(List<Double> golferScores : scores){
+            List<Double> sortedScores = new ArrayList<Double>(golferScores);
             Collections.sort(sortedScores);
-            double median;
-            if(sortedScores.size()%2==0){
-                median = sortedScores.get(sortedScores.size()/2);
-                medianErrors.put(median, entry.getKey());
-            }
-            else{
-                median = sortedScores.get(sortedScores.size()/2);
-                medianErrors.put(median, entry.getKey());
-            }
+            double median = sortedScores.size()%2 == 0 ? sortedScores.get(sortedScores.size()/2) : sortedScores.get((sortedScores.size()/2)-1);
+            medianErrors.set(i, median);
+            i++;
         }
 
-        Double prevMax = Double.MAX_VALUE;
-        for (int i = 0; i < 10; i++){
-            String golfer = points.getColumnAttributes(0).getValue((int)medianErrors.lowerEntry(prevMax).getValue().getValue());
-            System.out.println("Golfer: " + golfer + "\t\tMedian: " + medianErrors.lowerKey(prevMax));
-            prevMax = medianErrors.lowerKey(prevMax);
+        List<Integer> sortedIndices = new ArrayList<Integer>();
+        List<Double> tempMedianErrors = new ArrayList<Double>(medianErrors);
+        for(i = 0; i < medianErrors.size(); i++){
+            double min = Double.MAX_VALUE;
+            int minIndex = -1;
+            for(int j = 0; j < tempMedianErrors.size(); j++){
+                double error = tempMedianErrors.get(j);
+                if (error < min && !sortedIndices.contains(j)){
+                    min = error;
+                    minIndex = j;
+                }
+            }
+            sortedIndices.add(minIndex);
         }
+
+        for(Integer index : sortedIndices){
+            String golfer = points.getColumnAttributes(0).getValue(index);
+            System.out.println(golfer +"\t\t\t" + medianErrors.get(index));
+        }
+
+
+//        Map<Node, Double> medianErrors = new HashMap<Node, Double>();
+//        for(Map.Entry<NormalNode, List<Double>> entry : scores.entrySet()){
+//            List<Double> sortedScores = new ArrayList<Double>(entry.getValue());
+//            Collections.sort(sortedScores);
+//            double median;
+//            if(sortedScores.size()%2==0){
+//                median = sortedScores.get(sortedScores.size()/2);
+//                medianErrors.put(entry.getKey(), median);
+//            }
+//            else{
+//                median = sortedScores.get((sortedScores.size()/2)-1);
+//                medianErrors.put(entry.getKey(), median);
+//            }
+//        }
+
+
+//        Double prevMax = Double.MAX_VALUE;
+//        for (int i = 0; i < 10; i++){
+//            String golfer = points.getColumnAttributes(0).getValue((int)medianErrors.lowerEntry(prevMax).getValue().getValue());
+//            System.out.println("Golfer: " + golfer + "\t\tMedian: " + medianErrors.lowerKey(prevMax));
+//            prevMax = medianErrors.lowerKey(prevMax);
+//        }
 
 
     }

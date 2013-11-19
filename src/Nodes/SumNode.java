@@ -12,11 +12,12 @@ public class SumNode extends Node{
 
     @Override
     public NodeValue getNodeValue(){
-        return new NodeValue(this, node1.getValue()+ node2.getValue());
+        this.setNodeValue(new NodeValue(this, node1.getNodeValue().getValue() + node2.getNodeValue().getValue()));
+        return this.nodeValue;
     }
 
     @Override
     public double getValue(){
-        return node1.getValue() + node2.getValue();
+        return this.getNodeValue().getValue();
     }
 }

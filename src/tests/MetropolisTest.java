@@ -17,8 +17,8 @@ public class MetropolisTest {
         List<Node> normalNodeParameters = new ArrayList<Node>();
         ConstantNode meanNode = new ConstantNode(7);
         normalNodeParameters.add(meanNode);
-        ConstantNode varianceNode = new ConstantNode(3);
-        normalNodeParameters.add(varianceNode);
+        ConstantNode stdDevNode = new ConstantNode(Math.sqrt(3));
+        normalNodeParameters.add(stdDevNode);
         normalNode.addParameters(VariableNode.NO_PARENTS, normalNodeParameters);
         nodes.add(normalNode);
 

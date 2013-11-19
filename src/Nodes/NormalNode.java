@@ -5,7 +5,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.Set;
 
 public class NormalNode extends ContinuousNode{
 
@@ -14,21 +14,22 @@ public class NormalNode extends ContinuousNode{
         this.setNodeValue(new NodeValue(this, 1));
     }
 
-    public NormalNode(Node mean, Node variance){
+    public NormalNode(Node mean, Node stdDev){
         List<Node> parameters = new ArrayList<Node>();
         parameters.add(mean);
-        parameters.add(variance);
+        parameters.add(stdDev);
         this.addParameters(VariableNode.NO_PARENTS, parameters);
+        this.setNodeValue(new NodeValue(this, mean.getValue()));
     }
 
     @Override
     /**
-     * pdfParams.get(0) is mean, pdfParams.get(1) is variance (o^2)
+     * pdfParams.get(0) is mean, pdfParams.get(1) is stdDev (o)
      */
     public double pdf(double x, List<Node> pdfParams) {
         double mean = pdfParams.get(0).getNodeValue().getValue();
-        double variance = pdfParams.get(1).getNodeValue().getValue();
-        NormalDistribution normalDistribution = new NormalDistribution(mean, Math.sqrt(variance));
+        double stdDev = pdfParams.get(1).getNodeValue().getValue();
+        NormalDistribution normalDistribution = new NormalDistribution(mean, stdDev*stdDev);
 
         return normalDistribution.density(x);
     }
@@ -60,5 +61,11 @@ public class NormalNode extends ContinuousNode{
         if(randUniform < testProbability - currentProbability){
             this.setNodeValue(testValue);
         }
+    }
+
+    @Override
+    public void addParameters(Set<NodeValue> parentValues, List<Node> parameterValues){
+        parameters.put(parentValues, parameterValues);
+        this.setNodeValue(new NodeValue(this, parameterValues.get(0).getValue()));
     }
 }

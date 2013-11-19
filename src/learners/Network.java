@@ -19,7 +19,7 @@ public class Network {
         int numNodes = nodes.size();
         for(int i = 0; i < iterations; i++){
             Collections.shuffle(tempNodes);
-            for(int j = 0; j < numNodes; j++){
+            for(int j = 0; j < tempNodes.size(); j++){
                 VariableNode randNode = tempNodes.get(j);
                 if(!randNode.isObserved()){
                     randNode.sample();
