@@ -3,10 +3,23 @@ package Nodes;
 import helpers.Rand;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class NormalNode extends ContinuousNode{
+
+    public NormalNode(){
+        super();
+        this.setNodeValue(new NodeValue(this, 1));
+    }
+
+    public NormalNode(Node mean, Node variance){
+        List<Node> parameters = new ArrayList<Node>();
+        parameters.add(mean);
+        parameters.add(variance);
+        this.addParameters(VariableNode.NO_PARENTS, parameters);
+    }
 
     @Override
     /**

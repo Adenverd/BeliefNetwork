@@ -50,8 +50,6 @@ public class MetropolisTest {
         inverseGammaNode.addChild(childNode);
         nodes.add(inverseGammaNode);
 
-        System.out.println(inverseGammaNode.pdf(5, igParameters));
-
         CalculateSumAndVariance(inverseGammaNode, nodes, 100000, 100000); //15.5, 1
 
     }

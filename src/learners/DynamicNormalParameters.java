@@ -1,3 +1,5 @@
+package learners;
+
 import java.util.List;
 
 public class DynamicNormalParameters {
@@ -22,6 +24,6 @@ public class DynamicNormalParameters {
     }
 
     public double getVariance(){
-        return varianceSum/numElements;
+        return (varianceSum - (meanSum*meanSum)/numElements)/(numElements);
     }
 }

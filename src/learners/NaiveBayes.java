@@ -1,4 +1,8 @@
+package learners;
+
 import Nodes.*;
+import helpers.Counter;
+import helpers.Pair;
 import ml.ColumnAttributes;
 import ml.Matrix;
 import ml.SupervisedLearner;
@@ -80,7 +84,16 @@ public class NaiveBayes extends SupervisedLearner {
                     childNode.addCategoricalParent(categoricalParent);
                 }
 
-                //TODO: calculate the mean and variance for the child node for each possible combination of parent values
+                //calculate mean and variance for each possible set of parent values
+                Map<Set<NodeValue>, DynamicNormalParameters> maxLikelihoods = childNormalMaximumLikelihoodEstimator(childNode.getParameters().keySet(), columnAttributes, features, labels);
+
+                //store means and variances in child node
+                for(Map.Entry<Set<NodeValue>, DynamicNormalParameters> entry : maxLikelihoods.entrySet()){
+                    List<Node> parameters = new ArrayList<Node>();
+                    parameters.add(new ConstantNode(entry.getValue().getMean()));
+                    parameters.add(new ConstantNode(entry.getValue().getVariance()));
+                    childNode.addParameters(entry.getKey(), parameters);
+                }
 
             }
         }
@@ -104,6 +117,52 @@ public class NaiveBayes extends SupervisedLearner {
         return parameters;
     }
 
+//    public Map<Set<NodeValue>, Double> calculateChildValueProbabilities(Set<Set<NodeValue>> parentValues, ColumnAttributes columnAttributes, Matrix features, Matrix labels){
+//        int featureColIndex = features.getColumnIndex(columnAttributes);
+//        Map<Pair<Set<NodeValue>, Double>, Double> probabilities = new HashMap<Pair<Set<NodeValue>, Double>, Double>(); //maps parent value - feature value pairs to their probabilities.
+//        Map<Pair<Set<NodeValue>, Double>, Counter<Double>> counters = new HashMap<Pair<Set<NodeValue>, Double>, Counter<Double>>(); //maps parent value - feature value combinations to counters
+//
+//        for(int i = 0; i < columnAttributes.getValues().size(); i++){
+//            for(Set<NodeValue> parentVals : parentValues){
+//                Counter<Double> counter = new Counter<Double>();
+//                Pair<Set<NodeValue>, Double> parentValueFeatureValuePair = new Pair<Set<NodeValue>, Double>(parentVals, (double)i);
+//
+//            }
+//        }
+//
+//        //loop over all the data
+//        for(int rowIndex = 0; rowIndex < features.getNumRows(); rowIndex++){
+//            //Construct a set of NodeValues representing the values of the parents in this row
+//            Set<NodeValue> rowLabelValues = new HashSet<NodeValue>();
+//            for(CategoricalNode categoricalParent : categoricalParentNodes){
+//                //get the column index in labels that corresponds to categoricalParent
+//                int categoricalParentColIndex = labels.getColumnIndex(columnNodeMap.get(categoricalParent));
+//
+//                //get the node value that represents the value in this row for the column of categoricalParent
+//                rowLabelValues.add(categoricalParent.getPossibleValue(labels.getRow(rowIndex).get(categoricalParentColIndex)));
+//            }
+//            double featureColValue = features.getRow(rowIndex).get(featureColIndex);
+//            counters.get(featureColValue).increment(rowLabelValues);
+//
+//            //if we already have values for mean and variance given the parent values, update them with the values from this row's feature column
+//            if(counters.contains(rowLabelValues)){
+//                Double prevParameters = parentValuesParameters.get(rowLabelValues);
+//                double featureColValue = features.getRow(rowIndex).get(featureColIndex);
+//                prevParameters.addElement(featureColValue);
+//            }
+//            //if we haven't seen this set of parent values before, add this row's feature column value to mean and variance
+//            else{
+//                DynamicNormalParameters parameters = new DynamicNormalParameters();
+//                double featureColValue = features.getRow(rowIndex).get(featureColIndex);
+//
+//                parameters.addElement(featureColValue);
+//
+//                parentValuesParameters.put(rowLabelValues, parameters);
+//            }
+//
+//        }
+//    }
+
     /**
      * Calculates the mean and variance for a continuous column with categorical parents for all possible combinations of parent values.
      * @param parentValues
@@ -126,7 +185,7 @@ public class NaiveBayes extends SupervisedLearner {
                 rowLabelValues.add(categoricalParent.getPossibleValue(labels.getRow(rowIndex).get(categoricalParentColIndex)));
             }
 
-            //if we already have values for mean and variance given the parent values, update them with the values from this row's feature column
+            //if we already have values for mean and variance given the parent values, update them with the value from this row's feature column
             if(parentValuesParameters.containsKey(rowLabelValues)){
                 DynamicNormalParameters prevParameters = parentValuesParameters.get(rowLabelValues);
                 double featureColValue = features.getRow(rowIndex).get(featureColIndex);
@@ -145,4 +204,6 @@ public class NaiveBayes extends SupervisedLearner {
 
         return parentValuesParameters;
     }
+
+
 }

@@ -7,6 +7,9 @@ import java.util.List;
 
 public class InverseGammaNode extends ContinuousNode{
 
+    public InverseGammaNode(){
+        this.setNodeValue(new NodeValue(this, 1));
+    }
     /**
      * pdfParams.get(0) is alpha, pdfParams.get(1) is beta
      * @param pdfParams
