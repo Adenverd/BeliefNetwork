@@ -63,18 +63,6 @@ public class Counter<K> {
         return minKey;
     }
 
-    /**
-     * Gets the sum of all counts
-     * @return
-     */
-    public int getSum(){
-        int sum = 0;
-        for(Integer val : map.values()){
-            sum += val;
-        }
-        return sum;
-    }
-
     public void remove (K key){
         map.remove(key);
     }
